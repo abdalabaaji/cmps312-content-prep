@@ -39,7 +39,7 @@ fun AppNavigator(navHostController: NavHostController, paddingValues: PaddingVal
         }
 
         composable(route = Screen.FundTransfer.route) {
-            TransferFund(onFundTransfer = {
+            TransferFund(bankingViewModel, onFundTransfer = {
                 navHostController.navigate(Screen.Beneficiary.route)
             })
         }

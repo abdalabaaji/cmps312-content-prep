@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.cmps312.bankingapp.ui.navigation.AppNavigator
 import com.cmps312.bankingapp.ui.viewmodel.BankingViewModel
 import com.cmps312.bankingapp.ui.navigation.Screen
 import com.cmps312.bankingapp.ui.theme.BankingAppTheme
@@ -27,19 +28,9 @@ fun MainScreen() {
     Scaffold(
         bottomBar = { BottomBar(navHostController) }
     ) { paddingValues ->
-//        AppNavigator(navHostController, paddingValues)
-        TestTheListOfAccounts(paddingValues)
+        AppNavigator(navHostController, paddingValues)
     }
 }
-
-@Composable
-fun TestTheListOfAccounts(paddingValues: PaddingValues) {
-    val bankingViewModel: BankingViewModel = viewModel()
-    TransferList(bankingViewModel = bankingViewModel) {
-
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar() {

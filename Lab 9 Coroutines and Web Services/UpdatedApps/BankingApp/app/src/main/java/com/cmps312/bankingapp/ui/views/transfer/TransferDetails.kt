@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -25,8 +26,11 @@ import com.cmps312.bankingapp.ui.viewmodel.BankingViewModel
 fun TransferDetails(transferId: String, onNavigateBack: () -> Unit) {
     val bankingViewModel =
         viewModel<BankingViewModel>(viewModelStoreOwner = LocalContext.current as ComponentActivity)
-
-    val transfer = bankingViewModel.getTransfer(transferId)
+    val transfer =
+        bankingViewModel.transfers
+            .collectAsState()
+            .value
+            .find { it.transferId == transferId }
 
     Scaffold(
         topBar = {
@@ -46,9 +50,11 @@ fun TransferDetails(transferId: String, onNavigateBack: () -> Unit) {
         }
     ) {
         Card(
-            modifier = Modifier.padding(it).fillMaxSize(),
+            modifier = Modifier
+                .padding(it)
+                .height(140.dp),
 
-        ) {
+            ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),

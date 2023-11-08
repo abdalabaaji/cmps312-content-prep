@@ -1,11 +1,13 @@
 package com.cmps312.bankingapp.data.webapi
 
+import android.util.Log
 import com.cmps312.bankingapp.data.model.Account
 import com.cmps312.bankingapp.data.model.BankService
 import com.cmps312.bankingapp.data.model.Beneficiary
 import com.cmps312.bankingapp.data.model.Transfer
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -17,27 +19,42 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 
 class QuBankService : BankService {
-
+    private val refreshIntervalMs: Long = 20000
     private val baseUrl = "https://cmps312banking.cyclic.app/api"
-    private val client = HttpClient {
+    private val TAG = "QuBankService"
+
+    private val client = HttpClient(OkHttp) {
+        expectSuccess = true  //exception for non two hundred
         install(ContentNegotiation) {
             json(
                 json = Json {
-                    ignoreUnknownKeys = true
                     prettyPrint = true
+                    ignoreUnknownKeys = true
                 }
             )
         }
         //Log HTTP request/response details for debugging
-//        install(Logging) { level = LogLevel.BODY }
+        install(Logging) { level = LogLevel.BODY }
     }
 
-    override suspend fun getTransfers(cid: Int): List<Transfer> {
+    override fun getTransfers(cid: Int) = flow {
+        while (true) {
+            val url = "$baseUrl/transfers/$cid"
+            val transfers = client.get(url)
+            emit(transfers.body<List<Transfer>>())
+            delay(refreshIntervalMs)
+        }
+    }
+
+    suspend fun getTransfersNoFlow(cid: Int): List<Transfer> {
         val url = "$baseUrl/transfers/$cid"
-        return client.get(url).body()
+        return client.get(url).body<List<Transfer>>()
+
     }
 
     override suspend fun addTransfer(transfer: Transfer): Transfer {
